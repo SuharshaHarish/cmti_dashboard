@@ -9,8 +9,14 @@
     socket.onopen =function(e){
         var d = new Date(); // for now
         var hrs = d.getHours(); // => 9
-        if (hrs >= 17 || hrs<9) {
-        alert('Machine is currently off');
+        var day = d.getDay();
+        if (day == 0 || day==6){            
+            alert('Machine is currently off');
+        }
+        else{
+            if (hrs >= 17 || hrs<9) {
+            alert('Machine is currently off');
+            }
         }
         // console.log(hrs)
     };

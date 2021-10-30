@@ -1,6 +1,7 @@
 from django.db.models.base import Model
 from numpy.core.fromnumeric import sort
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 import time,json
 import websocket
 import requests
@@ -134,6 +135,7 @@ def find_limits():
             continue
         speedOvr_data.append(speedOvr_value)
     speedOvr_intrvl = st.t.interval(0.95, len(speedOvr_data)-1, loc=np.mean(speedOvr_data), scale=st.sem(speedOvr_data))
+    print(speedOvr_intrvl)
     
     #find feedRateOvr mean confidence interval
     feedRateOvrs = FeedOverride.objects.all()
@@ -484,3 +486,7 @@ def graphs(request):
     }
 
     return render(request,'opcua_app/graphs.html',args)
+
+def redirect_to_home(request):
+
+    return redirect(reverse('home'))
