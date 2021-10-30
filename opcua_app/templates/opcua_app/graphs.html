@@ -1,0 +1,76 @@
+{% extends 'opcua_app/base.html' %} {% block body %} {% load static %}
+{% include 'opcua_app/navbar.html' %}
+<style>
+    .graphs{
+        display: block;
+        align-items: center;
+        justify-content: center;
+    }
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .feedRateOvr{
+        margin: 2% 5%;
+    }
+    .speedOvr{
+        margin: 2% 5%;
+    }
+    .Spindle_speed{
+        margin: 2% 5%;
+    }
+
+    .cp, .fr{
+        margin: 2% 5%;
+    }
+
+</style>
+<div class="contain">
+    <div class="graphs">
+        <div class="center">
+            <div class="feedRateOvr">
+                {{div_feedRateOvr| safe}}
+            </div>
+        </div>
+        <div class="center">
+            <div class="Spindle_Speed">
+                {{div_actSpeed| safe}}
+            </div>            
+        </div>
+        <div class="center">
+            <div class="speedOvr">
+                {{div_speedOvr| safe}}
+            </div>
+        </div>
+        <div class="center">
+            <div class="cp">
+                {{div_cp| safe}}
+            </div>
+        </div>
+        <div class="center">
+            <div class="fr">
+                {{div_fr| safe}}
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+<script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-2.4.0.min.js"></script>
+<script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-2.4.0.min.js"></script>
+<script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-tables-2.4.0.min.js"></script>
+<script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-api-2.4.0.min.js"></script> 
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+    {{script_speedOvr | safe}}
+    {{script_feedRateOvr | safe}}
+    {{script_actSpeed | safe}}
+    {{script_cp | safe}}
+    {{script_fr | safe}}
+{% endblock %}

@@ -1,0 +1,85 @@
+<style>
+
+.scene {
+  width: 200px;
+  height: 260px;
+  margin: 40px 0;
+  perspective: 600px;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  transition: transform 1s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  position: relative;
+}
+
+.card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card__face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  line-height: 260px;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  font-size: 40px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.card__face--front {
+  background: red;
+}
+
+.card__face--back {
+  background: blue;
+  transform: rotateY(180deg);
+}
+
+</style>
+<div class="scene scene--card">
+  <div class="card">
+    <div class="card__face card__face--front">front</div>
+    <div class="card__face card__face--back">back</div>
+  </div>
+</div>
+<div class="scene scene--card">
+    <div class="card">
+      <div class="card__face card__face--front">front</div>
+      <div class="card__face card__face--back">back</div>
+    </div>
+</div>
+  <p>Click card to flip.</p>
+  <ul>
+    <li><a href="javascript:void(0)" class="button blue">blue</a></li>
+    <li><a href="javascript:void(0)" class="button green">green</a></li>
+    <li><a href="javascript:void(0)" class="button red">red</a></li>
+</ul>
+  <script>
+      var card = document.getElementsByClassName('card');
+      console.log(card.length);
+      for(var i=0;i<card.length;i++){
+        
+        console.log(card[i].classList);
+        card[i].onclick = function(event) {
+          console.log(event.target.parentNode);
+          
+        event.target.parentNode.classList.toggle('is-flipped');
+        };
+        }
+
+        var buttons = document.getElementsByClassName('button');
+for (var i = 0; i < buttons.length; i++) {
+    buttons[i].onmouseover = function (event) {
+      console.log(i,buttons[i]);
+        var colour = event.target.className.split(" ")[1];       
+        document.body.style.backgroundColor = colour;
+    }
+}
+  </script>

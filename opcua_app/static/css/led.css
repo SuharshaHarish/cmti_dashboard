@@ -1,0 +1,33 @@
+.led-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+
+.mode_led .led-box {
+  height: 33%;
+}
+
+.mode_desc {
+  margin-left: 20px;
+  width: 200px;
+}
+
+.mode_led {
+  height: 80%;
+}
+.status_desc {
+  margin-left: 20px;
+  width: 200px;
+}
+
+.led-indicator {
+  margin: 20px;
+  width: 12px;
+  height: 12px;
+  /* background-color: #28ffbf; */
+  background-color: #c8c6c6;
+  border-radius: 50%;
+  box-shadow: #000 0 -1px 7px 1px, inset #c8c6c6 0 -1px 9px, #c8c6c6 0 2px 12px;
+}

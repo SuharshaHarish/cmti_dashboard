@@ -1,0 +1,482 @@
+{% extends 'opcua_app/base.html' %} {% block body %} {% load static %}
+{% include 'opcua_app/navbar.html' %}
+<link rel="stylesheet" href="{% static 'css/led.css'%}" />
+<link rel="stylesheet" href="{% static 'css/flip.css'%}" />
+<link rel="stylesheet" href="{% static 'css/home.css'%}" />
+<script>
+
+    let socket =new WebSocket('ws://localhost:8000/ws/polData');
+    socket.onopen =function(e){
+        var d = new Date(); // for now
+        var hrs = d.getHours(); // => 9
+        if (hrs >= 17 || hrs<9) {
+        alert('Machine is currently off');
+        }
+        // console.log(hrs)
+    };
+
+    socket.onmessage = function(e){
+        console.log(e.data);
+        // alert('Connection established');
+        var recData=JSON.parse(e.data);
+        // temperature = recData["temperature"];
+        // pressure = recData["pressure"];
+
+        speedOvr = recData["speedOvr"];
+        feedRateOvr = recData["feedRateOvr"];
+        actSpeed = recData["actSpeed"];
+        mode = recData["mode"];
+        status = recData["status"];
+        actPartProgram = recData["actPartProgram"];
+        workPName = recData["workPName"];
+        progName = recData["progName"];
+        fr_x = recData["fr_x"];  
+        fr_y = recData["fr_y"]; 
+        fr_z = recData["fr_z"]; 
+        fr_b = recData["fr_b"]; 
+        cp_x = recData["cp_x"];
+        cp_y = recData["cp_y"];
+        cp_z = recData["cp_z"]; 
+        cp_b = recData["cp_b"];
+
+        // Changing Spindle_Speed Gauge
+
+        var target = document.getElementById('Spindle_Speed_chart'); // your canvas element
+        var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+        gauge.maxValue = 5000; // set max gauge value
+        gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+        gauge.animationSpeed = 32; // set animation speed (32 is default value)
+        gauge.set(actSpeed); // set actual value
+        document.getElementById('Spindle_Speed_value').innerHTML = actSpeed +" RPM";
+
+        // Changing Feed Override Gauge
+
+        var target2 = document.getElementById('feedRateOvr_chart'); // your canvas element
+        var gauge2 = new Gauge(target2).setOptions(opts2); // create sexy gauge!
+        gauge2.maxValue = 150; // set max gauge value
+        gauge2.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+        gauge2.animationSpeed = 32; // set animation speed (32 is default value)
+        gauge2.set(feedRateOvr); // set actual value
+        document.getElementById('feedRateOvr_value').innerHTML = feedRateOvr+ " %";
+
+        // Changing Speed Override Gauge
+       
+        var target3 = document.getElementById('speedOvr_chart'); // your canvas element
+        var gauge3 = new Donut(target3).setOptions(opts3); // create sexy gauge!
+        gauge3.maxValue = 150; // set max gauge value
+        gauge3.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+        gauge3.animationSpeed = 32; // set animation speed (32 is default value)
+        gauge3.set(speedOvr); // set actual value
+        document.getElementById('speedOvr_value').innerHTML = speedOvr+ " %";
+
+        // Changing Mode, Status LED
+
+        var mode_led = document.getElementsByClassName('mode_led')[0].getElementsByClassName('led-indicator')[mode];
+        mode_led.style.backgroundColor = "#28ffbf";        
+
+        var status_led = document.getElementsByClassName('status_led')[0].getElementsByClassName('led-indicator')[status];
+        status_led.style.backgroundColor = "#28ffbf";
+
+        // Changing Axis Table        
+        
+        document.getElementsByClassName('feed_rate')[0].innerHTML = (fr_x*Math.pow(10, 6)).toPrecision(3);
+        document.getElementsByClassName('feed_rate')[1].innerHTML = (fr_y*Math.pow(10, 6)).toPrecision(3);
+        document.getElementsByClassName('feed_rate')[2].innerHTML = (fr_z*Math.pow(10, 6)).toPrecision(3);
+        document.getElementsByClassName('feed_rate')[3].innerHTML = (fr_b*Math.pow(10, 6)).toPrecision(3);    
+        
+        document.getElementsByClassName('current_position')[0].innerHTML = (cp_x*Math.pow(10, 6)).toPrecision(3);
+        document.getElementsByClassName('current_position')[1].innerHTML = (cp_y*Math.pow(10, 6)).toPrecision(3);
+        document.getElementsByClassName('current_position')[2].innerHTML = (cp_z*Math.pow(10, 6)).toPrecision(3);
+        document.getElementsByClassName('current_position')[3].innerHTML = (cp_b*Math.pow(10, 6)).toPrecision(3);
+
+        // Changing Machine Details
+
+        document.getElementById('actPartProgram_value').innerHTML = actPartProgram;
+        document.getElementById('workPName_value').innerHTML = workPName;
+        document.getElementById('progName_value').innerHTML = progName;
+    };
+
+    socket.onclose = function(e){
+        alert('Connection CLosed');
+    };    
+    </script>
+<div class="home">
+    <div class="charts">
+        <div class="Spindle_Speed">            
+            <div class="scene scene--card">
+                <div class="card">
+                <div class="card__face card__face--front">
+                    <h3>Spindle Speed</h3>
+                    <hr>
+                    <canvas id="Spindle_Speed_chart"></canvas>
+                    <div id = "Spindle_Speed_value"></div>
+                </div>
+                <div class="card__face card__face--back">
+                    <h3>Spindle Speed</h3>
+                    <hr>
+                    <div class = "values">
+                        <div class="min_value">
+                            Min : {{actSpeed_min}}
+                        </div>
+                        <div class="avg_value">
+                            Avg : {{actSpeed_mean}}
+                        </div>
+                        <div class="max_value">
+                            Max : {{actSpeed_max}}
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div> 
+        
+        <div class="feedRateOvr">
+            <div class="scene scene--card">
+                <div class="card">
+                  <div class="card__face card__face--front">            
+                    <h3>Feed Override</h3>
+                    <hr>
+                    <canvas id="feedRateOvr_chart"></canvas>
+                    <div id = "feedRateOvr_value"></div>
+                  </div>
+                  <div class="card__face card__face--back">
+                        <h3>Feed Override</h3>
+                        <hr>
+                        <div class = "values">
+                            <div class="min_value">
+                                Min : {{feedRateOvr_min}}
+                            </div>
+                            <div class="avg_value">
+                                Avg : {{feedRateOvr_mean}}
+                            </div>
+                            <div class="max_value">
+                                Max : {{feedRateOvr_max}}
+                            </div>
+                        </div>
+                  </div>
+                </div>
+            </div>
+        </div>       
+    </div>
+    <div class="charts">
+        <div class="speedOvr">
+            <div class="scene scene--card">
+                <div class="card">
+                  <div class="card__face card__face--front">
+                    <h3>Speed Override</h3>
+                    <hr>
+                    <canvas id="speedOvr_chart"></canvas>
+                    <div id = "speedOvr_value"></div>
+                  </div>
+                  <div class="card__face card__face--back">
+                        <h3>Speed Override</h3>
+                        <hr>
+                        <div class = "values">
+                            <div class="min_value">
+                                Min : {{speedOvr_min}}
+                            </div>
+                            <div class="avg_value">
+                                Avg : {{speedOvr_mean}}
+                            </div>
+                            <div class="max_value">
+                                Max : {{speedOvr_max}}
+                            </div>
+                        </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="mode_status">            
+            <div class="scene scene--card">
+                <div class="card">
+                    <div class="card__face card__face--front">
+                        <h3>Machine Status</h3>
+                        <hr>
+                        <div class="status_led">
+                            <div class="led-box">
+                                <div class="led-indicator"></div>
+                                <div class="status_desc">Aborted</div>
+                            </div>
+                            <div class="led-box">
+                                <div class="led-indicator"></div>
+                                <div class="status_desc">Halted</div>
+                            </div>
+                            <div class="led-box">
+                                <div class="led-indicator"></div>
+                                <div class="status_desc">Running</div>
+                            </div>
+                            <div class="led-box">
+                                <div class="led-indicator"></div>
+                                <div class="status_desc">Waiting</div>
+                            </div>
+                            <div class="led-box">
+                                <div class="led-indicator"></div>
+                                <div class="status_desc">Interrupted</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card__face card__face--back">
+                        <h3>Machine Mode</h3>
+                        <hr>
+                        <div class="mode_led">
+                            <div class="led-box">
+                            <div class="led-indicator"></div>
+                            <div class="mode_desc">JOG</div>
+                            </div>
+                            <div class="led-box">
+                            <div class="led-indicator"></div>
+                            <div class="mode_desc">MDI</div>
+                            </div>
+                            <div class="led-box">
+                            <div class="led-indicator"></div>
+                            <div class="mode_desc">AUTO</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div> 
+    </div>
+    <div class="table_withdesc">
+        <div class="table_coordinates">   
+            <div class="scene scene--card">
+                <div class="card">
+                  <div class="card__face card__face--front">
+                    <h3>Feed Rate (μm/min)</h3>
+                    <hr>
+                    <table id="axis">
+                        <tr>
+                        <td>X Axis</td>
+                        <td class="feed_rate">0</td>
+                        </tr>
+                        <tr>
+                        <td>Y Axis</td>
+                        <td class="feed_rate">0</td>
+                        </tr>
+                        <tr>
+                        <td>Z Axis</td>
+                        <td class="feed_rate"> 0</td>
+                        </tr>
+                        <tr>
+                        <td>B Axis</td>
+                        <td class="feed_rate">0</td>
+                        </tr>
+                    </table>
+                  </div>
+                  <div class="card__face card__face--back">
+                    <h3>Current position (μm)</h3>
+                    <hr>
+                    <table id="axis">
+                        <tr>
+                        <td>X Axis</td>
+                        <td class="current_position">0</td>
+                        </tr>
+                        <tr>
+                        <td>Y Axis</td>
+                        <td class="current_position">0</td>
+                        </tr>
+                        <tr>
+                        <td>Z Axis</td>
+                        <td class="current_position">0</td>
+                        </tr>
+                        <tr>
+                        <td>B Axis</td>
+                        <td class="current_position">0</td>
+                        </tr>
+                    </table>
+                  </div>
+                </div>
+            </div>       
+            
+        </div>
+        <div class="desc scene">
+            <div class="card">
+
+                <div class="card__face card__face--front">
+                    <div class="desc_heading">
+                        <h3>Machine Details</h3>
+                        <hr>
+                    </div>
+                    <div class="desc_details">        
+                        <div class="workPName">
+                            <h3>Work Piece Name :- </h3>
+                            <p id="workPName_value" style="font-size: 20px;">/_N_MPF_DIR</p>
+                        </div>
+                        <div class="progName">                        
+                            <h3>Program Name :- </h3>
+                            <p id="progName_value" style="font-size: 20px;">_N_ANGLE_MILLING_MPF</p>                        
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card__face card__face--back">
+                    <div class="desc_heading">
+                        <h3>Machine Details</h3>
+                        <hr>
+                    </div>
+                    <div class="desc_details">
+                        <div class="actPartProgram">
+                            <h3>Part Program :-</h3> 
+                            <pre id = "actPartProgram_value">                                
+N1 G53 G90 G17 G40
+N2 ABC:
+N3 M03 S1000
+N4 R1=0
+N5 R2=0
+N6 R3=1
+N7 R4=15
+N8 G01 G90 X-498.0 F1000
+N9 G90 Y-300.0 Z-400.0
+N10 G0 X-250.0
+N11 Y0.0 Z-200.0
+;N12 GOTO N1
+                            </pre>
+                        </div>        
+                    </div>                
+                </div>
+            </div>       
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/gauge.min.js' %}"></script>
+
+<script>
+// Initial speedOvr gauge
+
+    var opts = {
+  angle: 0, // The span of the gauge arc
+  lineWidth: 0.2, // The line thickness
+  radiusScale: 1.1, // Relative radius
+  pointer: {
+    length: 0.5, // // Relative to gauge radius
+    strokeWidth: 0.035, // The thickness
+    color: '#FFFFFF' // Fill color
+  },
+  limitMax: false,     // If false, max value increases automatically if value > maxValue
+  limitMin: false,     // If true, the min value of the gauge will be fixed
+  colorStart: '#6FADCF',   // Colors
+  colorStop: '#8FC0DA',    // just experiment with them
+  strokeColor: '#E0E0E0',  // to see which ones work best for you
+  generateGradient: true,
+  highDpiSupport: true,     // High resolution support
+  
+  staticLabels: {
+  font: "12px sans-serif",  // Specifies font
+  labels: [200, 500, 2000, 3600, 5000],  // Print labels at these values
+  color: "#FFFFFF",  // Optional: Label text color
+  fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+    },
+  staticZones: [
+   {strokeStyle: "#F03E3E", min: 0, max: 200}, // Red from 100 to 130
+   {strokeStyle: "#FFDD00", min: 200, max: 500}, // Yellow
+   {strokeStyle: "#30B32D", min: 500, max: 2000}, // Green
+   {strokeStyle: "#FFDD00", min: 2000, max: 3600}, // Yellow
+   {strokeStyle: "#F03E3E", min: 3600, max: 5000}  // Red
+],
+};
+
+var target = document.getElementById('Spindle_Speed_chart'); // your canvas element
+var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+gauge.maxValue = 5000; // set max gauge value
+gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+gauge.animationSpeed = 32; // set animation speed (32 is default value)
+gauge.set(1250); // set actual value
+document.getElementById('Spindle_Speed_value').innerHTML = "1250 RPM"
+
+// Initial Feed Override gauge
+
+var opts2 = {
+  angle: 0, // The span of the gauge arc
+  lineWidth: 0.44, // The line thickness
+  radiusScale: 0.9, // Relative radius
+  pointer: {
+    length: 0.6, // // Relative to gauge radius
+    strokeWidth: 0.035, // The thickness
+    color: '#FFFFFF' // Fill color
+  },
+  limitMax: false,     // If false, max value increases automatically if value > maxValue
+  limitMin: false,     // If true, the min value of the gauge will be fixed
+  colorStart: '#6FADCF',   // Colors
+  colorStop: '#8FC0DA',    // just experiment with them
+  strokeColor: '#E0E0E0',  // to see which ones work best for you
+  generateGradient: true,
+  highDpiSupport: true,     // High resolution support
+  percentColors : [[0.0, "#2596be" ], [0.50, "#f9c802"], [1.0, "#ff0000"]],
+  staticLabels: {
+  font: "20px sans-serif",  // Specifies font
+  labels: [0, 25, 50, 75, 100, 125, 150],  // Print labels at these values
+  color: "#FFFFFF",  // Optional: Label text color
+  fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+},
+};
+var target2 = document.getElementById('feedRateOvr_chart'); // your canvas element
+var gauge2 = new Gauge(target2).setOptions(opts2); // create sexy gauge!
+gauge2.maxValue = 150; // set max gauge value
+gauge2.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+gauge2.animationSpeed = 32; // set animation speed (32 is default value)
+gauge2.set(5); // set actual value
+document.getElementById('feedRateOvr_value').innerHTML = "5 %"
+
+//Initial Spindle_Speed gauge
+
+var opts3 = {
+  angle: 0.35, // The span of the gauge arc
+  lineWidth: 0.1, // The line thickness
+  radiusScale: 0.8, // Relative radius
+  pointer: {
+    length: 0.6, // // Relative to gauge radius
+    strokeWidth: 0.035, // The thickness
+    color: '#FFFFFF' // Fill color
+  },
+  limitMax: false,     // If false, max value increases automatically if value > maxValue
+  limitMin: false,     // If true, the min value of the gauge will be fixed
+  colorStart: '#B980F0',   // Colors
+  colorStop: '#B980F0',    // just experiment with them
+  strokeColor: '#EEEEEE',  // to see which ones work best for you
+  generateGradient: true,
+  highDpiSupport: true,     // High resolution support
+  staticLabels: {
+  font: "20px sans-serif",  // Specifies font
+  labels: [0, 25, 50, 75, 100, 125, 150],  // Print labels at these values
+  color: "#FFFFFF",  // Optional: Label text color
+  fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+},
+};
+var target3 = document.getElementById('speedOvr_chart'); // your canvas element
+var gauge3 = new Donut(target3).setOptions(opts3); // create sexy gauge!
+gauge3.maxValue = 150; // set max gauge value
+gauge3.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+gauge3.animationSpeed = 32; // set animation speed (32 is default value)
+gauge3.set(100); // set actual value
+document.getElementById('speedOvr_value').innerHTML = "100 %"
+
+</script>
+
+
+<script>
+
+function upTo(el, tagName) {
+  tagName = tagName.toLowerCase();
+  while (el && el.parentNode) {
+    el = el.parentNode;   
+    // console.log(el.className); 
+    if (el.className == tagName || el.className== "card is-flipped") {
+      return el;
+    }
+  }
+  return null;
+}
+
+    var card = document.getElementsByClassName('card');
+      for(var i=0;i<card.length;i++){   
+        card[i].onclick = function(event) {
+            ele = upTo(event.target,"card");
+        //   console.log(event.target.parentNode);   
+        ele.classList.toggle('is-flipped');
+        };
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'opcua_app/base.html' %} {% block body %} {% load static %}
+{% include 'opcua_app/navbar.html' %}
+<style>
+    /* .anomaly{
+        width: 100%;
+        height: 100%;
+    } */
+    #heading{
+        font-family: 'Mulish', serif;
+        text-shadow: 2px 2px 2px #ababab;
+        text-align: center;
+        margin-top: 2%;
+    }
+    .contain{        
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: #FFFFFF;
+    }
+    .working_range{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .speedOvr_container{
+        margin: 2%;        
+        color: #FFFFFF;
+        background-color: #F9F9F9;
+        box-shadow: 5px 10px 10px #333333;        
+        border-radius: 20px;
+        
+    }
+    .feedRateOvr_container{        
+        margin: 2%;
+        color: #FFFFFF;
+        background-color: #F9F9F9;
+        box-shadow: 5px 10px 10px #333333;        
+        border-radius: 20px;
+    }
+    table {
+        
+        border-radius: 20px;
+        border-collapse: separate;
+        border-spacing: 0;
+        overflow: hidden;
+        width: 100%;
+        /* border: 2px solid black;       */
+        /* border-radius: 30px; */
+    }
+ 
+
+    th{
+        height: 80px;
+        padding: 8px;
+        color: #000000;
+        text-align: center;        
+        font-size: 20px;
+        border-bottom: 2px solid black;
+        background-color: #CDF0EA;
+    }
+    td {
+        /* margin: 20px; */
+        height: 80px;
+        padding: 8px;
+        color: #000000;
+        text-align: center;
+        border-bottom: 1px solid #333333;
+    }
+
+    tr:hover {
+        background-color:#DDDDDD;
+    }
+</style>
+<div class="anomaly">
+    <h1 id= "heading">Anomalies Detected</h1>         
+    
+    <div class="contain">
+        <div class="speedOvr_container">
+            <table style="width:100%">
+                <tr>
+                    <th>Speed Override</th>
+                </tr>
+                {% for speedOvr_anomaly in speedOvr_anomalies %}
+                <tr>
+                <td>    
+                    Warning! Speed Override reached {{speedOvr_anomaly.speedOvr_key.speed_override_value|floatformat:2}} % at {{speedOvr_anomaly.speedOvr_key.timestamp}}    
+                </td>
+                </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+        <div class="feedRateOvr_container">
+            <table style="width:100%">
+                <tr>
+                    <th>Feed Override</th>
+                </tr>   
+                
+            {% for feedRateOvr_anomaly in feedRateOvr_anomalies %}
+            <tr> 
+            <td>
+                Warning! Feed Override reached {{feedRateOvr_anomaly.feedRateOvr_key.feed_override_value|floatformat:2}} % at {{feedRateOvr_anomaly.feedRateOvr_key.timestamp}}    
+            </td>    
+            </tr>
+            {% endfor %}
+            
+            </table>   
+        </div>
+    </div>
+    <div class="working_range">
+        <p style="margin-right: 13%;">*Speed Override working range {{speedOvr_intrvl}} % </p>
+        <p style="margin-left: 11%;">*Feed Override working range {{feedRateOvr_intrvl}} %</p> 
+    </div>
+</div>
+
+{% endblock %}
